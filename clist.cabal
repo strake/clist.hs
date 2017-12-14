@@ -14,12 +14,15 @@ tested-with:         GHC ==8.0.*
 
 library
   exposed-modules:     Data.CList
-  extensions:          TypeOperators
+  extensions:          LambdaCase
+                     , TypeOperators
                      , FlexibleContexts
                      , FlexibleInstances
                      , GADTs
                      , DataKinds
                      , StandaloneDeriving
                      , DeriveFunctor, DeriveFoldable, DeriveTraversable
-  build-depends:       base >=4.9 && <5, peano >= 0.1 && <0.2
+  build-depends:       base >=4.9 && <5
+                     , peano >=0.1 && <0.2
+                     , natural-induction >=0.2 && <0.3
   ghc-options:         -Wall -Wno-name-shadowing -Wno-unticked-promoted-constructors

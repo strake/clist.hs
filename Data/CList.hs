@@ -1,18 +1,23 @@
-module Data.CList (module Data.Peano, CList (..), uncons, head, tail, init, last, reverse) where
+module Data.CList (module Data.Peano,
+                   CList (..),
+                   fromList, uncons, head, tail, init, last, reverse) where
 
-import Prelude (Show, fst, snd)
+import Prelude (Show (..), fst, snd, ($))
 
 import Control.Applicative
 import Control.Category
+import Control.Monad
 import Data.Eq
 import Data.Foldable
-import Data.Functor
+import Data.Maybe
 import Data.Monoid hiding ((<>))
+import Data.Natural.Class
 import Data.Ord
 import Data.Peano
 import Data.Semigroup
 import Data.Traversable
 import Data.Typeable
+import Text.Read (Read (..))
 
 infixr 5 :.
 
@@ -22,11 +27,24 @@ data CList n a where
 
 deriving instance (Eq   a) => Eq   (CList n a)
 deriving instance (Ord  a) => Ord  (CList n a)
-deriving instance (Show a) => Show (CList n a)
 deriving instance Functor     (CList n)
 deriving instance Foldable    (CList n)
 deriving instance Traversable (CList n)
 deriving instance Typeable CList
+
+instance Show a => Show (CList n a) where
+    show = show . toList
+
+instance (Read a, Natural n) => Read (CList n a) where
+    readPrec = fromList <$> readPrec >>= maybe empty pure
+
+fromList :: Natural n => [a] -> Maybe (CList n a)
+fromList = t $ natural (T $ \ case [] -> Just Nil
+                                   _  -> Nothing)
+                       (T $ \ case [] -> Nothing
+                                   x:xs -> (x:.) <$> fromList xs)
+
+data T a n = T { t :: [a] -> Maybe (CList n a) }
 
 instance Semigroup a => Semigroup (CList n a) where
     Nil <> Nil = Nil
