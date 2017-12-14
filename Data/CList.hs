@@ -9,9 +9,10 @@ import Control.Category.Unicode
 import Data.Eq
 import Data.Foldable
 import Data.Functor
-import Data.Monoid
+import Data.Monoid hiding ((<>))
 import Data.Ord
 import Data.Peano
+import Data.Semigroup
 import Data.Traversable
 import Data.Typeable
 
@@ -29,13 +30,18 @@ deriving instance Foldable    (CList n)
 deriving instance Traversable (CList n)
 deriving instance Typeable CList
 
-instance Monoid a => Monoid (CList Zero a) where
-    mempty = Nil
-    Nil `mappend` Nil = Nil
+instance Semigroup a => Semigroup (CList n a) where
+    Nil <> Nil = Nil
+    (x:.xs) <> (y:.ys) = x<>y:.xs<>ys
 
-instance (Monoid a, Monoid (CList n a)) => Monoid (CList (Succ n) a) where
+instance (Semigroup a, Monoid a) => Monoid (CList Zero a) where
+    mempty = Nil
+    mappend = (<>)
+
+instance (Semigroup a, Semigroup (CList n a),
+          Monoid a, Monoid (CList n a)) => Monoid (CList (Succ n) a) where
     mempty = mempty:.mempty
-    (x:.xs) `mappend` (y:.ys) = x<>y:.xs<>ys
+    mappend = (<>)
 
 instance Applicative (CList Zero) where
     pure x = Nil
